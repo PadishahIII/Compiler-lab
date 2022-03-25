@@ -1,4 +1,7 @@
 #include <stdio.h>
+#define A                \
+    yylloc.a = yylloc.b; \
+    a = b;
 
 int main()
 {
