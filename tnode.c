@@ -1,6 +1,5 @@
-#include <stdio.h>
-//#include "syntax.tab.h"
 #include "tnode.h"
+#include <stdio.h>
 
 Tree newTree(char *type, int num, int numOfChild, ...)
 {
@@ -50,7 +49,7 @@ Tree newTree(char *type, int num, int numOfChild, ...)
         {
             rootNode->intval = atoi(yytext);
         }
-        else
+        else if (!strcmp(type, "FLOAT"))
         {
             rootNode->fltval = atof(yytext);
         }
@@ -92,6 +91,11 @@ void Preorder(Tree node, int level)
     }
 }
 int Error = 0;
+void yyerror(char *msg)
+{
+    Error = 1;
+    fprintf(stderr, "Error Type B at Line %d : %s \'%s\'\n", yylineno, msg, yytext);
+}
 int main(int argc, char **argv)
 {
     if (argc <= 1)
@@ -112,7 +116,7 @@ int main(int argc, char **argv)
     yyparse();
     fclose(file);
 
-    if (!Error)
+    if (Error)
         return 0;
     for (int i = 0; i < nodeNum; i++)
     {
@@ -122,9 +126,4 @@ int main(int argc, char **argv)
         }
     }
     return 0;
-}
-void yyerror(char *msg)
-{
-    Error = 1;
-    fprintf(stderr, "Error Type B at Line %d,%d : %s \'%s\'\n", yylloc.first_line, yylloc.first_column, msg, yytext);
 }

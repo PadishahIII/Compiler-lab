@@ -1,16 +1,21 @@
 %{
-    #include "syntax.tab.h"
     #include "tnode.h"
-    int yycolumn = 1;
-    #define YY_USER_ACTION \
-        yylloc.first_line=yylloc.last_line=yycolumn;\
-        yylloc.first_column = yycolumn;\
-        yylloc.last_column =  yycolumn+yyleng-1;\
-        yycolumn+=yyleng;
+    #include<stdlib.h>
+    #include<stdio.h>
+    #include "syntax.tab.h"
+    extern int Error;
+    //int yycolumn = 1;
+    //#define YY_USER_ACTION \
+    //    yylineno=yylloc.last_line=yycolumn;\
+    //    yylloc.first_column = yycolumn;\
+    //    yylloc.last_column =  yycolumn+yyleng-1;\
+    //    yycolumn+=yyleng;
 %}
 
+%option yylineno
 
-INT 0|[1-9][0-9]{0,31}|0[0-7]{1,32}|0[xX][0-9a-fA-F]{1,32}|0b[01]{1,32}
+INT 0|[1-9][0-9]{0,31}|0[0-7]{1,32}|0[xX][0-9a-fA-F]{1,32}|0[bB][01]{1,32}
+INT_ERROR 0[0-7]*[89]+[0-7]*|0[xX][0-9a-fA-F]*[g-zG-Z]+[0-9a-fA-F]*|0[bB][01]*[2-9]+[01]*
 FLOAT [0-9]+\.[0-9]+|([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)[eE][\+\-]?[0-9]+
 ID [_a-zA-Z]+[_a-zA-Z0-9]{0,31}
 SEMI ";"
@@ -45,35 +50,43 @@ SPACE [ \f\r\t\v]+
 
 {COMMENT} {}
 {SPACE} {}
-{INT} {yylval.type_tree=newTree("INT",-1,0,yylloc.first_line); return INT;}
-{FLOAT} {yylval.type_tree=newTree("FLOAT",-1,0,yylloc.first_line);return FLOAT;}
-{SEMI} {yylval.type_tree=newTree("SEMI",-1,0,yylloc.first_line);return SEMI;}
-{COMMA} {yylval.type_tree=newTree("COMMA",-1,0,yylloc.first_line);return COMMA;}
-{ASSIGNOP} {yylval.type_tree=newTree("ASSIGNOP",-1,0,yylloc.first_line);return ASSIGNOP;}
-{RELOP} {yylval.type_tree=newTree("RELOP",-1,0,yylloc.first_line);return RELOP;}
-{PLUS} {yylval.type_tree=newTree("PLUS",-1,0,yylloc.first_line);return PLUS;}
-{MINUS} {yylval.type_tree=newTree("MINUS",-1,0,yylloc.first_line);return MINUS;}
-{STAR} {yylval.type_tree=newTree("STAR",-1,0,yylloc.first_line);return STAR;}
-{DIV} {yylval.type_tree=newTree("DIV",-1,0,yylloc.first_line);return DIV;}
-{AND} {yylval.type_tree=newTree("AND",-1,0,yylloc.first_line);return AND;}
-{OR} {yylval.type_tree=newTree("OR",-1,0,yylloc.first_line);return OR;}
-{DOT} {yylval.type_tree=newTree("DOT",-1,0,yylloc.first_line);return DOT;}
-{NOT} {yylval.type_tree=newTree("NOT",-1,0,yylloc.first_line);return NOT;}
-{TYPE} {yylval.type_tree=newTree("TYPE",-1,0,yylloc.first_line);return TYPE;}
-{LP} {yylval.type_tree=newTree("LP",-1,0,yylloc.first_line);return LP;}
-{RP} {yylval.type_tree=newTree("RP",-1,0,yylloc.first_line);return RP;}
-{LB} {yylval.type_tree=newTree("LB",-1,0,yylloc.first_line);return LB;}
-{RB} {yylval.type_tree=newTree("RB",-1,0,yylloc.first_line);return RB;}
-{LC} {yylval.type_tree=newTree("LC",-1,0,yylloc.first_line);return LC;}
-{RC} {yylval.type_tree=newTree("RC",-1,0,yylloc.first_line);return RC;}
-{STRUCT} {yylval.type_tree=newTree("STRUCT",-1,0,yylloc.first_line);return STRUCT;}
-{RETURN} {yylval.type_tree=newTree("RETURN",-1,0,yylloc.first_line);return RETURN;}
-{IF} {yylval.type_tree=newTree("IF",-1,0,yylloc.first_line);return IF;}
-{ELSE} {yylval.type_tree=newTree("ELSE",-1,0,yylloc.first_line);return ELSE;}
-{WHILE} {yylval.type_tree=newTree("WHILE",-1,0,yylloc.first_line);return WHILE;}
-{ID} {yylval.type_tree=newTree("ID",-1,0,yylloc.first_line);return ID;}
-\n {yycolumn=1;}
+\n {}
+{TYPE} {yylval.type_tree=newTree("TYPE",-1,0,yylineno);return TYPE;}
+{STRUCT} {yylval.type_tree=newTree("STRUCT",-1,0,yylineno);return STRUCT;}
+{RETURN} {yylval.type_tree=newTree("RETURN",-1,0,yylineno);return RETURN;}
+{IF} {yylval.type_tree=newTree("IF",-1,0,yylineno);return IF;}
+{ELSE} {yylval.type_tree=newTree("ELSE",-1,0,yylineno);return ELSE;}
+{WHILE} {yylval.type_tree=newTree("WHILE",-1,0,yylineno);return WHILE;}
 
-. {printf("Error Type A at Line %d: Mysterious characters \'%s\'\n",yycolumn,yytext);}
+{INT} {yylval.type_tree=newTree("INT",-1,0,yylineno); return INT;}
+{INT_ERROR} {printf("Error Type A at Line %d: Invaild Integer format \'%s\'\n",yylineno,yytext);Error=1;}
+{FLOAT} {yylval.type_tree=newTree("FLOAT",-1,0,yylineno);return FLOAT;}
+
+{SEMI} {yylval.type_tree=newTree("SEMI",-1,0,yylineno);return SEMI;}
+{COMMA} {yylval.type_tree=newTree("COMMA",-1,0,yylineno);return COMMA;}
+{ASSIGNOP} {yylval.type_tree=newTree("ASSIGNOP",-1,0,yylineno);return ASSIGNOP;}
+{RELOP} {yylval.type_tree=newTree("RELOP",-1,0,yylineno);return RELOP;}
+{PLUS} {yylval.type_tree=newTree("PLUS",-1,0,yylineno);return PLUS;}
+{MINUS} {yylval.type_tree=newTree("MINUS",-1,0,yylineno);return MINUS;}
+{STAR} {yylval.type_tree=newTree("STAR",-1,0,yylineno);return STAR;}
+{DIV} {yylval.type_tree=newTree("DIV",-1,0,yylineno);return DIV;}
+{AND} {yylval.type_tree=newTree("AND",-1,0,yylineno);return AND;}
+{OR} {yylval.type_tree=newTree("OR",-1,0,yylineno);return OR;}
+{DOT} {yylval.type_tree=newTree("DOT",-1,0,yylineno);return DOT;}
+{NOT} {yylval.type_tree=newTree("NOT",-1,0,yylineno);return NOT;}
+{LP} {yylval.type_tree=newTree("LP",-1,0,yylineno);return LP;}
+{RP} {yylval.type_tree=newTree("RP",-1,0,yylineno);return RP;}
+{LB} {yylval.type_tree=newTree("LB",-1,0,yylineno);return LB;}
+{RB} {yylval.type_tree=newTree("RB",-1,0,yylineno);return RB;}
+{LC} {yylval.type_tree=newTree("LC",-1,0,yylineno);return LC;}
+{RC} {yylval.type_tree=newTree("RC",-1,0,yylineno);return RC;}
+
+{ID} {yylval.type_tree=newTree("ID",-1,0,yylineno);return ID;}
+
+. {printf("Error Type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);Error=1;}
 %%
+
+int yywrap(){
+    return 1;
+}
 

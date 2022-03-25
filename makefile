@@ -1,5 +1,5 @@
 target=parser
-cfile= syntax.tab.c tnode.c
+cfile= syntax.tab.c tnode.c globals.c
 CC=gcc
 
 $(target):$(cfile)

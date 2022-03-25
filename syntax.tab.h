@@ -90,14 +90,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 6 "syntax.y"
+#line 7 "syntax.y"
 
-    int type_int;
-    float type_float;
     double type_double;
-    Tree type_tree;
+    tnode type_tree;
 
-#line 101 "syntax.tab.h"
+#line 99 "syntax.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

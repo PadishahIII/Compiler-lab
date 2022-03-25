@@ -1,6 +1,10 @@
 //#pragma once
+#ifndef TNODE_H
+#define TNODE_H
 
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define LISTSIZE 1000
 
@@ -34,8 +38,10 @@ Tree newTree(char *type, int num, int numOfChild, ...);
 
 void Preorder(Tree rootNode, int level);
 
-int nodeNum; //节点数量
+extern int nodeNum; //节点数量
 /*  nodeList和IsChild的作用是在建好语法树之后寻找根节点（因为是从下向上建立），不用存储叶节点
  */
-tnode nodeList[LISTSIZE]; //存储所有非叶节点
-int IsChild[LISTSIZE];    // 1:nodeList[]中的对应节点不是根节点
+extern tnode nodeList[LISTSIZE]; //存储所有非叶节点
+extern int IsChild[LISTSIZE];    // 1:nodeList[]中的对应节点不是根节点
+
+#endif
