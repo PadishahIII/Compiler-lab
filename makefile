@@ -1,12 +1,12 @@
 target=parser
-cfile=main.c syntax.tab.c 
+cfile= syntax.tab.c tnode.c
 CC=gcc
 
 $(target):$(cfile)
-	$(CC) $^ -o $@ -lfl
+	$(CC) $^ -o $@ -lfl 
 
-syntax.tab.c syntax.tab.h:syntax.y lex.yy.c 
+syntax.tab.c syntax.tab.h:syntax.y lex.yy.c tnode.c tnode.h
 	bison -d syntax.y
 
-lex.yy.c:lexical.l makefile
+lex.yy.c:lexical.l makefile tnode.c tnode.h
 	flex lexical.l

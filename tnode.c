@@ -1,9 +1,11 @@
+#include <stdio.h>
+//#include "syntax.tab.h"
 #include "tnode.h"
 
 Tree newTree(char *type, int num, int numOfChild, ...)
 {
-    tnode *rootNode = (tnode *)malloc(sizeof(tnode));
-    tnode *child;
+    tnode rootNode = (tnode)malloc(sizeof(struct Tnode));
+    tnode child;
     if (!rootNode)
     {
         yyerror("malloc tnode error");
@@ -14,21 +16,23 @@ Tree newTree(char *type, int num, int numOfChild, ...)
     rootNode->leftchild = rootNode->next = NULL;
 
     va_list param_list;
-    va_start(param_list, numOfChild); //初始化参数列表
+    va_start(param_list, numOfChild); //初始化参 数列表
 
     if (numOfChild > 0) //非终结符 union字段为空
     {
-        child = va_arg(param_list, tnode *);
-        IsChild[child->num] = 1;
+        child = va_arg(param_list, tnode);
+        if (child->num >= 0)
+            IsChild[child->num] = 1;
         rootNode->lineno = child->lineno;
         rootNode->leftchild = child;
         if (num >= 2)
         {
             for (int i = 0; i < numOfChild - 1; i++)
             {
-                child->next = va_arg(param_list, tnode *);
+                child->next = va_arg(param_list, tnode);
                 child = child->next;
-                IsChild[child->num] = 1;
+                if (child->num >= 0)
+                    IsChild[child->num] = 1;
             }
         }
     }
@@ -62,7 +66,7 @@ void Preorder(Tree node, int level)
         {
             printf("  ");
         }
-        if (node->lineno >= 0)
+        if (node->lineno >= 0) //空语法单元的lineno为-1
         {
             printf("%s", node->type);
             if ((!strcmp(node->type, "ID")) || (!strcmp(node->type, "TYPE")))
@@ -86,4 +90,41 @@ void Preorder(Tree node, int level)
         Preorder(node->leftchild, level + 1);
         Preorder(node->next, level);
     }
+}
+int Error = 0;
+int main(int argc, char **argv)
+{
+    if (argc <= 1)
+        return 0;
+    FILE *file = fopen(argv[1], "r");
+    if (!file)
+    {
+        perror(argv[1]);
+        return 1;
+    }
+    nodeNum = 0;
+    memset(nodeList, NULL, sizeof(tnode) * LISTSIZE);
+    memset(IsChild, 0, sizeof(int) * LISTSIZE);
+    Error = 0;
+
+    yyrestart(file);
+    // yydebug = 1;
+    yyparse();
+    fclose(file);
+
+    if (!Error)
+        return 0;
+    for (int i = 0; i < nodeNum; i++)
+    {
+        if (IsChild[i] != 1)
+        {
+            Preorder(nodeList[i], 0);
+        }
+    }
+    return 0;
+}
+void yyerror(char *msg)
+{
+    Error = 1;
+    fprintf(stderr, "Error Type B at Line %d,%d : %s \'%s\'\n", yylloc.first_line, yylloc.first_column, msg, yytext);
 }

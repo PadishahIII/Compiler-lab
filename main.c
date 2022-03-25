@@ -1,6 +1,6 @@
 #include <stdio.h>
-//#include "lex.yy.c"
 #include "syntax.tab.h"
+//#include "lex.yy.c"
 #include "tnode.h"
 
 int Error = 0;
@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         return 1;
     }
     nodeNum = 0;
-    memset(nodeList, NULL, sizeof(tnode *) * LISTSIZE);
+    memset(nodeList, NULL, sizeof(tnode) * LISTSIZE);
     memset(IsChild, 0, sizeof(int) * LISTSIZE);
     Error = 0;
 

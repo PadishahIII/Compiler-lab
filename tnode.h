@@ -1,33 +1,41 @@
+//#pragma once
+
 #include <stdarg.h>
 #include <string.h>
 #define LISTSIZE 1000
+
 extern int yylineno;
 extern char *yytext;
+void yyerror(char *msg);
 
-typedef struct tnode
+typedef struct Tnode
 {
-    int num;          //在nodeList中的编号
-    int lineno;       //节点所在行号
-    char *type;       //节点类型
-    tnode *leftchild; //左子树
-    tnode *next;      //当前节点的兄弟链表
+    int num;                 //在nodeList中的编号,终结符的num为-1
+    int lineno;              //节点所在行号
+    char *type;              //节点类型
+    struct Tnode *leftchild; //左子树
+    struct Tnode *next;      //当前节点的兄弟 链表
     union
     {
         char *ID_TYPE; // ID和TYPE类型的节点的属性为字符串
         int intval;
         float fltval;
     };
-} * Tree, tnode;
+} * Tree, *tnode;
+// typedef struct Tnode *Tree;
+// typedef struct Tnode tnode;
 
 /*  numOfChild个tnode
     num:根节点的序号
-    申请单个节点:newTree("ID",num,0,lineno)
-    申请两个节点:newTree("ID",num,2,&tnode1,&tnode2)
+    申请单个节点(叶节点):newTree("ID",-1,0,lineno)  属性由yytext确定
+    申请两个节点:newTree("ID",num,2,tnode1,tnode2)
  */
 Tree newTree(char *type, int num, int numOfChild, ...);
 
 void Preorder(Tree rootNode, int level);
 
-int nodeNum;               //节点数量
-tnode *nodeList[LISTSIZE]; //存储所有节点
-int IsChild[LISTSIZE];     // 1:nodeList[]中的对应节点不是根节点
+int nodeNum; //节点数量
+/*  nodeList和IsChild的作用是在建好语法树之后寻找根节点（因为是从下向上建立），不用存储叶节点
+ */
+tnode nodeList[LISTSIZE]; //存储所有非叶节点
+int IsChild[LISTSIZE];    // 1:nodeList[]中的对应节点不是根节点

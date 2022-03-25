@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "tnode.h"
 #define A                \
     yylloc.a = yylloc.b; \
     a = b;
